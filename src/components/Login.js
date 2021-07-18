@@ -1,20 +1,71 @@
-import React from "react";
+import React , {useEffect, useState}from "react";
+import {useHistory} from 'react-router-dom';
+import axios from 'axios';
+
 
 const Login = () => {
+
+  const [values, setValues] = useState({
+    username:'',
+    password: '',
+
+  })
+
+
   // make a post request to retrieve a token from the api
   // when you have handled the token, navigate to the BubblePage route
 
-  const error = "";
+  const [error, setError] = useState('')
+  ;
   //replace with error state
 
+  const {push} = useHistory();
+
+  const handleChange = e => {
+    setValues({
+      ...values,
+      [e.target.name]: e.target.values
+    })
+  }
+
+  const handleSubmit = e => {
+
+    e.preventDefault()
+    axios.post('http://localhost:5000/api/login', values)
+    .then(res => {
+      localStorage.setItem('token', res.data.payload)
+      push('/bubbles')
+    })
+    .catch(err => setError('Username or Password not valid'))
+
+  }
+  
   return (
     <div>
       <h1>Welcome to the Bubble App!</h1>
       <div data-testid="loginForm" className="login-form">
-        <h2>Build login form here</h2>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            name="username"
+            placeholder="username"
+            value={values.username}
+            onChange={handleChange}
+            data-testid="username"
+          />
+          <input
+            type="password"
+            name="password"
+            placeholder="password"
+            value={values.password}
+            onChange={handleChange}
+            data-testid="password"
+          />
+          <button>Log In</button>
+        </form>
       </div>
 
-      <p id="error" className="error">{error}</p>
+      <p data-testid="errorMessage" className="error">{error}</p>
     </div>
   );
 };
